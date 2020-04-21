@@ -1,4 +1,4 @@
-# One-break sleeping beauty
+# sleeping beauty insertion
 screening of insertion sites of the Sleeping beauty.
 primer-5'SBend- GTGTATGTAAACTTCCGACTTCAACTG+TA
 
