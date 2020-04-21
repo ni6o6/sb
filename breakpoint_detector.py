@@ -34,7 +34,8 @@ def breakpoint_detector(infile, outfile, re):
 
     #reverse complement
     trans = str.maketrans('ATGCatgc', 'TACGTAGC')
-    
+    #infile='BB_1_S1_R1_001.bam'
+    #outfile='result.txt'
     # Open the input BAM file
     in_bam_file = pysam.AlignmentFile(f'./bam/{infile}', "rb") 
     # Initialize the iterator
@@ -43,26 +44,23 @@ def breakpoint_detector(infile, outfile, re):
     with open(f'./break/{outfile}', 'w') as hout:
     # Start going through the input BAM file, one position at a time.
         for read in bam_entry:
-            #print(read)
+                
             sb_direction = ''
             #print(read)
             # get the flag information
-            flags = format(int(read.flag), "#014b")[:1:-1]
-            
+            flags = format(int(read.flag), "#014b")[:1:-1]        
             # skip if not aligned
             if flags[2] == "1": continue
-    
             # skip supplementary alignment
             if flags[8] == "1" or flags[11] == "1": continue
-    
-            # skip duplicated reads
-            #if flags[10] == "1": continue
             
-            if read.is_read1:
+            #get mapq
+            mapq = read.mapping_quality
+            if mapq <= 10: continue
+            if read.is_read1: #<- for paired-end
                 #get reference id
                 refid = read.reference_name
-                #get position
-                position = read.pos
+    
                 #get read direction
                 if read.is_reverse:
                     direction = '-'
@@ -76,15 +74,14 @@ def breakpoint_detector(infile, outfile, re):
                     if tupple[0] == 4: 
                         soft_size = tupple[1]
                         aln_length=read.query_alignment_length
-                        break_posi = position + int(aln_length)-1
-                        a = read.query_alignment_end #count 1-start.
-                        #get genome_sb_seq
+                        #reference_end point to one past the last residue. So, break_position is
+                        break_posi = read.reference_end-1 
+                        a_end = read.query_alignment_end
+                        #the size of genome_seq ~15
                         r1 = min([aln_length,15])
-                        #r2 = min([soft_size,28])
-                        raw_seq = read.query_sequence[a-r1:a+soft_size] # range 0-start
-                        #genome_seq = read.query_sequence[a-15:a]
-                        #sb_seq = read.query_sequence[a:a+28]
-                        #break_seq = genome_seq+'|'+sb_seq
+                        read.query_sequence[0]
+                        #get genome+full of soft-clipping seq. genome_seq+'|'+sb_seq
+                        raw_seq = read.query_sequence[a_end-r1:a_end+soft_size]
                         #reverse comp
                         comp_seq = raw_seq.translate(trans)
                         revcomp_seq = ''.join(reversed(comp_seq))
@@ -105,16 +102,12 @@ def breakpoint_detector(infile, outfile, re):
                     if tupple[0] == 4: 
                         soft_size = tupple[1]
                         aln_length=read.query_alignment_length
-                        break_posi = position
-                        a = read.query_alignment_start #count 1-start. soft_size
-                        #get sb_genome_seq
-                        #r1 = min([int(a),27])
+                        break_posi = read.reference_start
+                        a_start = read.query_alignment_start #count 1-start. soft_size
+                        #the size of genome_seq ~15
                         r2 = min([aln_length,16])
-                        raw_seq = read.query_sequence[0:a+r2] # range 0-start 
-                        #genome_seq = read.query_sequence[a:a+16]
-                        #sb_seq = read.query_sequence[a-27:a]
-                        #break_seq = sb_seq+'|'+genome_seq
-                        
+                        #full of soft-clipping seq + genome. sb_seq+'|'+genome_seq
+                        raw_seq = read.query_sequence[0:a_start+r2]
                         #try:
                         #    SA = read.get_tag('SA')
                         #except KeyError:
@@ -123,6 +116,7 @@ def breakpoint_detector(infile, outfile, re):
                             sb_direction = 'sb(<-)'
                         elif re == 'NX':
                             sb_direction = 'sb(->)'
+                            
                         rec = str(refid)+'\t'+str(break_posi)+'\t'+str(soft_size)+'\t'+str(direction)+'\t'+str(raw_seq)+'\t'+str(raw_seq)+\
                         '\t'+str(sb_direction)+'\n'
                         

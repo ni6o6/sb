@@ -125,17 +125,17 @@ def annot_sbinsert(infile, out_pre):
             alignment = sw.align(seq, 'GTGTATGTAAACTTCCGACTTCAACTG')
             sw_match = alignment.matches
             #sw_cigar = alignment.cigar 
-            #ratio sw_match score/27 
-            sw_ratio = round(float(sw_match/27),2)
+            #ratio sw_match score/soft-clipping length
+            sw_ratio = round(float(sw_match/sb_length),2)
             
             #'chr','position(0-start)','ori_position','family_size','sb_direction','adj_seq','soft_clip_len','sw_match','sw_match_ratio','sb-seq|','|genome2bases','ori_sb|genome_seq'
             rec = str(chr)+'\t'+str(adj_position)+'\t'+str(position)+'\t'+str(reads)+'\t'+str(sb_direction)+'\t'+str(adj_seq)+'\t'+ \
                     str(sb_length)+'\t'+str(sw_match)+'\t'+str(sw_ratio)+'\t'+ \
                     str(sb_motif)+'\t'+str(genome2base)+'\n'         
-                    # filtering: reads>=3, sb_length =24~30 and sw_match_ratio>0.9 PASS
+                    # filtering: reads>=3, sb_length =22~30 and sw_match_ratio>0.9 PASS
             if int(reads)>=3 and float(sw_ratio)>0.9:
                 h2out.write(rec) 
-            if int(reads)>=3 and float(sw_ratio)>0.9 and int(sb_length)>=24 and int(sb_length)<=30 and str(sb_motif)=='+':
+            if int(reads)>=3 and float(sw_ratio)>0.9 and int(sb_length)>=22 and int(sb_length)<=30 and str(sb_motif)=='+':
                 h1out.write(rec)
             else: continue        
             
