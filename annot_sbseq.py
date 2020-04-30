@@ -12,7 +12,7 @@ Created on Sun Apr  5 15:09:45 2020
 3. calculate the sw_match ratio = sw_match score/soft-clipping size.
 4. detect the insertion site bases
 5. detect sb motif at break position.
-6. extract reads by family size>=3, length of soft-clipping = 24~30 and smith waterman sw_match ratio>0.9.
+6. extract reads by family size>=3, length of soft-clipping = 22~30 and smith waterman sw_match ratio>0.9.
 
 column of input file
             1. chr
@@ -54,14 +54,14 @@ from argparse import ArgumentParser
 import swalign
 import pathlib
 
-def annot_sbinsert(infile, out_pre):
+def annot_sbinsert(infile):
     #choose your own values here… 2 and -1 are common.
     match = 2
     mismatch = -1
     scoring = swalign.NucleotideScoringMatrix(match, mismatch)
     sw = swalign.LocalAlignment(scoring)
     
-    file_path = pathlib.Path(out_pre)
+    file_path = pathlib.Path(infile)
     name = file_path.stem
     outfile_full = name+'.ann.fil.txt'
     outfile = name+'.ann.fil.strict.txt'
@@ -95,16 +95,16 @@ def annot_sbinsert(infile, out_pre):
                 if adj == -4 and seq[sb_length-8:sb_length+4] == 'CGACTTCAACTG':
                     j = 1
                     genome2base = seq[sb_length+4:sb_length+6]
-                if adj == -3 and seq[sb_length-8:sb_length+3] == 'GACTTCAACTG':
+                elif adj == -3 and seq[sb_length-8:sb_length+3] == 'GACTTCAACTG':
                     j = 1
                     genome2base = seq[sb_length+3:sb_length+5]
-                if adj == -2 and seq[sb_length-8:sb_length+2] == 'ACTTCAACTG':
+                elif adj == -2 and seq[sb_length-8:sb_length+2] == 'ACTTCAACTG':
                     j = 1
                     genome2base = seq[sb_length+2:sb_length+4]
-                if adj == -1 and seq[sb_length-8:sb_length+1] == 'CTTCAACTG':
+                elif adj == -1 and seq[sb_length-8:sb_length+1] == 'CTTCAACTG':
                     j = 1
                     genome2base = seq[sb_length+1:sb_length+3]
-                if adj == 0 and seq[sb_length-8:sb_length] == 'TTCAACTG':
+                elif adj == 0 and seq[sb_length-8:sb_length] == 'TTCAACTG':
                     j = 1
                     genome2base = seq[sb_length:sb_length+2]
                 if j == 1:
@@ -114,6 +114,11 @@ def annot_sbinsert(infile, out_pre):
                         adj_position = int(position) + int(adj)
                     if read_direction == '+':
                         adj_position = int(position) + int(adj)*-1
+                else:
+                    adj_position = int(position)
+                    sb_motif = '-'
+                    adj_seq = seq[0:sb_length] + '|' + seq[sb_length:]
+                    genome2base = seq[sb_length:sb_length+2]
             else:
                 #adj_position = original position
                 adj_position = int(position)
@@ -144,10 +149,9 @@ if __name__ == "__main__":
     # Parameters to be input.
     parser = ArgumentParser()
     parser.add_argument("--infile", action="store", dest="infile", help="input BAM file", required=True)
-    parser.add_argument("--out_pre", action="store", dest="out_pre", help="output file", required=True)
+    
     o = parser.parse_args()
     infile = o.infile
-    out_pre = o.out_pre
     
-    annot_sbinsert(infile, out_pre)
+    annot_sbinsert(infile)
 
