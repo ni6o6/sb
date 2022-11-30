@@ -66,6 +66,7 @@ python annot_sbseq.py --input_file ${pr}_break.cs.txt --output_file ${pr}_break.
 ```
 run_sb2.sh
 ```
+Use sb2.sh.
 Input file should be "mapping_list.txt".  
 The sb2.sh contains 3 steps.  
 (1) unify ids   
@@ -93,6 +94,7 @@ python sb_add_gene.py --input_file ./break/BBNX_${pr}_break.cs.ann.fil.strict.tx
 ```
 run_sb3.sh
 ```
+python sb_proc_list2.py  
 input_file=./sample/ID_list_all.txt  
 ID,Group  
 110,1  
@@ -105,8 +107,12 @@ Set group list in the run_sb4.sh script.
 ```
 run_sb4.sh 
 ```
-
-Output {}..ins1base.humanGene.colrecGene.txt  
+(1)sb_merge_samples.py   
+(2)sb_cis.py  
+(3)add_mm10repeats.py  
+(4)sb_postproc_backTo1.py  
+Output:   
+..ins1base.humanGene.colrecGene.txt    
 new columns  
 insertion_count  
 position_count  
