@@ -3,11 +3,11 @@ Detection of insertion sites of the Sleeping beauty.
 The sequences around the insertion site should be 
 primer-5'SBend- GTGTATGTAAACTTCCGACTTCAACTG+TA - genome
 
-# Input data
+## Input data
 Sequencing fastq files are located in the directory ${DATA_DIR}.  
 Two librares are prepared using two restriction enzymes, NX or BB for a sample. 
 
-# Preparation of list files.  
+## Preparation of list files.  
 ### 1. The list of fastq files (fastq_list.txt).   
 The file should be a comma-separated file with the following columns:   
 - Column[0]: SeqID to identify the fastq file. Use a prefix of the fastq.gz file (e.g., xxx.fastq.gz).
@@ -28,7 +28,7 @@ The header is not needed.
   111,groupA  
   :
 
-# Step1: Mapping
+## STEP1: Mapping
 Map the fastq in ${DATA_DIR} folder to the genome.
 ```  
 data_dir=${DATA_DIR}    
@@ -70,7 +70,7 @@ python consensus_maker.py --infile ./break/${pr}_break.txt --outfile ./break/${p
 python annot_sbseq.py --input_file ${pr}_break.cs.txt --output_file ${pr}_break.cs.ann.fil.strict.txt
 ```
 
-## STEP2: Combine files
+## STEP3: Combine files
 ```
 run_sb2.sh
 ```
@@ -98,7 +98,7 @@ The file prefix starts with "BBNX_" (example, BBNX_002_break.cs.ann.fil.strict.t
 - column[4] sample name (BBNX_002)  
 - column[5] gene  
 
-## STEP3: Create a list used for the merge process.  
+## STEP4: Create a list used for the merge process.  
 ```
 run_sb3.sh
 ```
@@ -108,7 +108,7 @@ The output file will have a name like a id_list_{Group}.txt.
 python sb_proc_list2.py  
 ```
 
-## STEP4: Merge files by group, calculate p-value and annotate the gene informations.
+## STEP5: Merge files by group, calculate p-value and annotate the gene informations.
 Set id_group list in the run_sb4.sh script.
 ```
 run_sb4.sh 
@@ -121,7 +121,7 @@ run_sb4.sh
 Output file format:   
 The file name will be finish "..ins1base.humanGene.colrecGene.txt"    
  
-## STEP5: Make bed file of the insertion postions
+## STEP6: Make bed file of the insertion postions
 ```
 bash run_sb5.sh  
 ```
