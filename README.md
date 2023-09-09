@@ -1,11 +1,12 @@
-# Sleeping beauty Insertion Site Detection
-Detection of insertion sites of the Sleeping beauty.  
+# Detection of insertion sites of the Sleeping Beauty transposon.
+Detection of insertion sites of the Sleeping beauty and caluculation of common transposon integration sites (CIS).  
+
 The sequences around the insertion site should be 
 primer-5'SBend- GTGTATGTAAACTTCCGACTTCAACTG+TA - genome
 
 ## Input data
 Sequencing fastq files are located in the directory ${DATA_DIR}.  
-Two librares are prepared using two restriction enzymes, NX or BB for a sample. 
+Two libraries are prepared using two restriction enzymes, Nlalll and BfaI for a sample. NlaIII-digested samples are labelled NX and BfaI-digested samples are labelled BB. 
 
 ## Preparation of list files.  
 ### 1. The list of fastq files (fastq_list.txt).   
@@ -13,7 +14,7 @@ The file should be a comma-separated file with the following columns:
 - Column[0]: SeqID to identify the fastq file. Use a prefix of the fastq.gz file (e.g., xxx.fastq.gz).
 - Column[1]: An unique sample ID to identify the sample. It will be the prefix of the output BAM file (e.g., NX_uniqueID.bam or BB_uniqueID.bam).
 - Column[2]: NX or BB
-- Column[3]: Group  
+- Column[3]: Group (Experimental groups with different genotypes and conditions)
 Example:   
 903,324,NX,35    
 904,325,NX,35   
@@ -21,7 +22,7 @@ Example:
 The header is not needed.   
 
 ### 2. The list of Unique IDs and Group names (id_list_all.txt)     
-  - Column[0]:  unique id for a sample.
+  - Column[0]: unique id for a sample.
   - Column[1]: group name.  
   Example:   
   110,groupA  
@@ -37,7 +38,7 @@ REFERENCE=GRCm38p4_SB.genome.fa
 
 run_smap.sh  
 ```
-The GRCm38p4_SB.genome.fa file includes the mouse genome and the Sleeping beauty transposon sequence.  
+The GRCm38p4_SB.genome.fa file includes the mouse genome and the Sleeping Beauty transposon sequence.  
 For single-end sequencing data, the run_smap.sh script utilizes the smap.sh script.      
    
 ## STEP2: Breakpoint detection
@@ -58,7 +59,7 @@ For paired-end, use breakpoint_detector.py.
 ```
 python consensus_maker.py --infile ./break/${pr}_break.txt --outfile ./break/${pr}_break.cs.txt --cut_off 0.8
 ```
-(3) Annotattion of SB sequences and Filtering the SB inserted positions.  
+(3) Annotation of SB sequences and Filtering the SB inserted positions.  
 -  this step performs the following processes:  
 3.1. adjust the insertion position.  
 3.2. calculate the sw_match score.  
@@ -108,7 +109,7 @@ The output file will have a name like a id_list_{Group}.txt.
 python sb_proc_list2.py  
 ```
 
-## STEP5: Merge files by group, calculate p-value and annotate the gene informations.
+## STEP5: Merge files by group, calculate p-value and annotate the gene information.
 Set id_group list in the run_sb4.sh script.
 ```
 run_sb4.sh 
@@ -132,18 +133,18 @@ python sb_makebedfile.py --list id_list_{Group}.txt --outfile output_file
 
 ## Output file format
 1. chr
-2. Start position (10k window with 5k sliding. The windows are stitched if the p-value is lower than or equal to 0.001.)
-3. End position
-4. The counts of the insertion sites in the 10k window. The counts are joined by commma in the stitched windows.
-5. p-values for each windows.
+2. Start position of CIS (10k window with 5k sliding. The windows are stitched if the p-value is lower than or equal to 0.001).
+3. End position of CIS.
+4. The counts of the insertion sites in the 10k window. The counts are joined by comma in the stitched windows.
+5. p-values for each window.
 6. Minimum p-value in the stitched windows.
-7. Sample IDs which has the insertion in the windows.
+7. Sample IDs which have the insertion in the windows.
 8. SimpleRepeat score (http://hgdownload.soe.ucsc.edu/goldenPath/mm10/database/simpleRepeat.txt.gz, https://genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=rep&hgta_track=simpleRepeat&hgta_table=simpleRepeat&hgta_doSchema=describe+table+schema)
 9. SimpleRepeat sequence 
 10. Segmental Duplication	(http://genome.ucsc.edu/cgi-bin/hgTables?db=mm10&hgta_group=varRep&hgta_track=genomicSuperDups&hgta_table=genomicSuperDups&hgta_doSchema=describe+table+schema)
 11. The count of insertions in the stitched window.
 12. The total number of the insertion positions.	
-13. Gene annotations for each insertion position (gene name | direction of the transcript). 
+13. Gene annotations for each CIS (gene name | direction of the transcript). 
 14. The relationship of the direction of Sleeping beauty and the transcript.	
 15. Human_homolog	
 16. Frequency in TCGA Colorectal cancers.	(https://www.cbioportal.org/study/summary?id=coadread_tcga_pan_can_atlas_2018)
